@@ -35,9 +35,27 @@ def create_unit_test():
 
 
 @tool
-def create_component_directory():
-    """Creates a new directory for the new React component."""
-    pass
+def create_component_directory(directory: str) -> str:
+    """
+    Create a new writable directory with the given directory name if it does not exist.
+    If the directory exists, it ensures the directory is writable.
+
+    Parameters:
+    directory (str): The name of the directory to create.
+
+    Returns:
+    str: Success or error message.
+    """
+    if ".." in directory:
+        return f"Cannot make a directory with '..' in path"
+    try:
+        os.makedirs(directory, exist_ok=True)
+        subprocess.run(["chmod", "u+w", directory], check=True)
+        return f"Directory successfully '{directory}' created and set as writeable."
+    except subprocess.CalledProcessError as e:
+        return f"Failed to create or set writable directory '{directory}': {e}"
+    except Exception as e:
+        return f"An unexpected error occurred: {e}"
 
 
 # list of the tools
@@ -82,10 +100,33 @@ agent_executor = AgentExecutor(
     verbose=True
 )
 
+def print_help():
+    help_text = """
+To create a React component, please provide the following details:
+1. Component Name
+2. Component Type (Functional/Class-based)
+3. Props (list the props)
+4. State Management (yes/no)
+5. Styling (CSS modules/inline styles/other)
+6. Dependencies (list any external libraries)
+7. Default Content (structure of the component)
+8. Interactions (events the component should handle)
+
+Type 'h' to show this help message again.
+Type 'q' to quit.
+"""
+    print(help_text)
+
+print_help()
+
+
 # user prompt
 while True:
-    user_prompt = input('Component Creator: (q to quit)\n')
+    user_prompt = input('Component Creator: (h for help,q to quit)\n ')
     if user_prompt.lower() == 'q':
         print('Goodbye!')
         break
-    list(agent_executor.stream({'input': user_prompt}))
+    elif user_prompt.lower() == 'h':
+        print_help()
+    else:
+        list(agent_executor.stream({'input': user_prompt}))
