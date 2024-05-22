@@ -26,7 +26,8 @@ def create_react_component(details: str):
                      type, properties, state management, styling, dependencies, default content, and user interactions.
 
     Returns:
-    str: The JSX code for the React component without additional comments or data.
+    str: The JSX code for the React component without additional comments or data,
+    intended to be saved with a .md file extension.
     """
 
     prompt = f"Create a React functional component with the following details:\n{details}\n"
@@ -37,37 +38,47 @@ def create_react_component(details: str):
 # Define the create_component_documentation tool
 
 @tool
-def build_component_documentation():
+def create_component_documentation(details: str):
     """
-    Creates documentation for the new React component.
+    Generates markdown documentation for a new React component based on provided details.
 
-    Parameters:
-    - details (str): The details of the React component for which the documentation will be created.
+    This function formats the documentation as a markdown file (.md), which includes descriptions of the component's
+    purpose, properties, usage examples, and any other relevant information.
+
+    Parameters: - details (str): A detailed description of the React component, including its purpose, properties,
+    expected behavior, and any special notes.
 
     Returns:
-    str: The generated documentation.
+    str: The markdown-formatted documentation for the React component, intended to be saved with a .md file extension.
     """
-    # prompt = f"Create documentation for a React component with the following details:\n{details}\n"
-    # llm_response = llm.call(prompt)
-    return 'create docs'
+    prompt = f"Create documentation for a React component with the following details:\n{details}\n"
+    llm_response = llm.invoke(prompt)
+    return llm_response
 
 
 # Define the create_unit_test tool
 
 @tool
-def create_unit_test():
+def create_unit_test(details: str):
     """
-    Creates unit tests for the new React component.
+    Generates JavaScript unit tests for a new React component based on provided details.
+
+    This function creates a set of unit tests, leveraging frameworks like Jest or Mocha (if applicable),
+    tailored to validate the functionality and behavior of the specified React component.
+    The unit tests ensure that the component behaves as expected under various conditions.
 
     Parameters:
-    - details (str): The details of the React component for which the unit tests will be created.
+    - details (str): A detailed description of the React component, including its functionalities,
+    properties, state management, and interaction behaviors that need to be tested.
 
     Returns:
-    str: The generated unit tests.
+    str: The JavaScript code for the unit tests of the React component, intended to be saved with
+    a .test.js file extension.
     """
-    # prompt = f"Create unit tests for a React component with the following details:\n{details}\n"
-    # llm_response = llm.call(prompt)
-    return 'create unit tests'
+
+    prompt = f"Create unit tests for a React component with the following details:\n{details}\n"
+    llm_response = llm.invoke(prompt)
+    return llm_response
 
 
 # Define the save_to_directory tool
@@ -96,7 +107,7 @@ def save_to_directory(directory: str, filename: str, content: str, file_type: st
         'documentation': '.md',
         'unit_test': '.js'
     }
-    file_extension = extensions.get(file_type, '.txt')  # Default to .txt if file_type is unrecognized
+    file_extension = extensions.get(file_type, '.js')
 
     # Ensure directory exists
     os.makedirs(directory, exist_ok=True)
@@ -142,7 +153,9 @@ def create_component_directory(directory: str) -> str:
 tools = [
     create_react_component,
     create_component_directory,
-    save_to_directory
+    save_to_directory,
+    create_component_documentation,
+    create_unit_test
 
 ]
 
