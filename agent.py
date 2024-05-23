@@ -59,21 +59,23 @@ def create_component_documentation(details: str):
 # Define the create_unit_test tool
 
 @tool
-def create_unit_test(details: str):
+def create_test(details: str):
     """
     Generates JavaScript unit tests for a new React component based on provided details.
 
-    This function creates a set of unit tests, leveraging frameworks like Jest or Mocha (if applicable),
-    tailored to validate the functionality and behavior of the specified React component.
-    The unit tests ensure that the component behaves as expected under various conditions.
+    This function creates a set of unit tests in plain JavaScript, without reliance on any specific
+    testing frameworks. These tests are designed to validate the functionality
+    and behavior of the specified React component. The tests check that the component performs
+    as expected under various conditions by directly manipulating the component's properties and
+    state and observing the outcomes.
 
     Parameters:
     - details (str): A detailed description of the React component, including its functionalities,
     properties, state management, and interaction behaviors that need to be tested.
 
     Returns:
-    str: The JavaScript code for the unit tests of the React component, intended to be saved with
-    a .test.js file extension.
+    str: The plain JavaScript code for the unit tests of the React component, intended to be saved with
+    a .js file extension.
     """
 
     prompt = f"Create unit tests for a React component with the following details:\n{details}\n"
@@ -105,9 +107,9 @@ def save_to_directory(directory: str, filename: str, content: str, file_type: st
     extensions = {
         'react': '.jsx',
         'documentation': '.md',
-        'unit_test': '.js'
+        'test': '.js'
     }
-    file_extension = extensions.get(file_type, '.js')
+    file_extension = extensions.get(file_type, '.jsx')
 
     # Ensure directory exists
     os.makedirs(directory, exist_ok=True)
@@ -155,7 +157,7 @@ tools = [
     create_component_directory,
     save_to_directory,
     create_component_documentation,
-    create_unit_test
+    create_test
 
 ]
 

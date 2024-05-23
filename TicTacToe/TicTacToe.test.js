@@ -4,90 +4,99 @@ import '@testing-library/jest-dom/extend-expect';
 import TicTacToe from './TicTacToe'; // Adjust the import based on your file structure
 
 describe('TicTacToe Component', () => {
-  test('Initial Render: game board, current player, and reset button render correctly', () => {
+  test('Initial Render: renders correctly with an empty 3x3 grid and a reset button', () => {
     render(<TicTacToe />);
     
-    // Check if the game board is rendered with 9 cells
+    // Check for 3x3 grid
     const cells = screen.getAllByRole('button', { name: /cell/i });
     expect(cells).toHaveLength(9);
+    cells.forEach(cell => expect(cell).toHaveTextContent(''));
     
-    // Check if the current player is 'X'
-    const currentPlayer = screen.getByText(/Current Player: X/i);
-    expect(currentPlayer).toBeInTheDocument();
-    
-    // Check if the reset button is rendered
+    // Check for reset button
     const resetButton = screen.getByRole('button', { name: /reset/i });
     expect(resetButton).toBeInTheDocument();
   });
 
-  test('Player Moves: players can make moves and the board updates accordingly', () => {
+  test('Player Interaction: correct marks (X or O) are placed in the grid', () => {
     render(<TicTacToe />);
     
     const cells = screen.getAllByRole('button', { name: /cell/i });
     
-    // Simulate a move by player 'X'
+    // Simulate player X click
     fireEvent.click(cells[0]);
     expect(cells[0]).toHaveTextContent('X');
     
-    // Simulate a move by player 'O'
+    // Simulate player O click
     fireEvent.click(cells[1]);
     expect(cells[1]).toHaveTextContent('O');
   });
 
-  test('Game Status: game status updates correctly (next player or winner)', () => {
+  test('Win Detection: winning condition for both players updates the score correctly', () => {
     render(<TicTacToe />);
     
     const cells = screen.getAllByRole('button', { name: /cell/i });
     
-    // Simulate moves
+    // Simulate a winning condition for player X
     fireEvent.click(cells[0]); // X
-    fireEvent.click(cells[1]); // O
-    fireEvent.click(cells[3]); // X
+    fireEvent.click(cells[3]); // O
+    fireEvent.click(cells[1]); // X
+    fireEvent.click(cells[4]); // O
+    fireEvent.click(cells[2]); // X wins
+    
+    const xScore = screen.getByTestId('x-score');
+    expect(xScore).toHaveTextContent('1');
+    
+    // Reset the game
+    const resetButton = screen.getByRole('button', { name: /reset/i });
+    fireEvent.click(resetButton);
+    
+    // Simulate a winning condition for player O
+    fireEvent.click(cells[0]); // X
+    fireEvent.click(cells[3]); // O
+    fireEvent.click(cells[1]); // X
     fireEvent.click(cells[4]); // O
     fireEvent.click(cells[6]); // X
+    fireEvent.click(cells[5]); // O wins
     
-    // Check if the game status updates to show the winner
-    const gameStatus = screen.getByText(/Winner: X/i);
-    expect(gameStatus).toBeInTheDocument();
+    const oScore = screen.getByTestId('o-score');
+    expect(oScore).toHaveTextContent('1');
   });
 
-  test('Winner Calculation: winner is correctly identified', () => {
-    render(<TicTacToe />);
-    
-    const cells = screen.getAllByRole('button', { name: /cell/i });
-    
-    // Simulate moves to make 'X' the winner
-    fireEvent.click(cells[0]); // X
-    fireEvent.click(cells[1]); // O
-    fireEvent.click(cells[3]); // X
-    fireEvent.click(cells[4]); // O
-    fireEvent.click(cells[6]); // X
-    
-    // Check if the winner is correctly identified
-    const winner = screen.getByText(/Winner: X/i);
-    expect(winner).toBeInTheDocument();
-  });
-
-  test('Reset Functionality: reset button clears the board and resets the game state', () => {
+  test('Reset Functionality: reset button clears the game board and resets the scores', () => {
     render(<TicTacToe />);
     
     const cells = screen.getAllByRole('button', { name: /cell/i });
     const resetButton = screen.getByRole('button', { name: /reset/i });
     
-    // Simulate moves
+    // Simulate some moves
     fireEvent.click(cells[0]); // X
     fireEvent.click(cells[1]); // O
     
-    // Click the reset button
+    // Click reset button
     fireEvent.click(resetButton);
     
-    // Check if the board is cleared
+    // Check that the board is cleared
+    cells.forEach(cell => expect(cell).toHaveTextContent(''));
+    
+    // Check that the scores are reset
+    const xScore = screen.getByTestId('x-score');
+    const oScore = screen.getByTestId('o-score');
+    expect(xScore).toHaveTextContent('0');
+    expect(oScore).toHaveTextContent('0');
+  });
+
+  test('Accessibility: component meets accessibility standards', () => {
+    render(<TicTacToe />);
+    
+    // Check color contrast and focus management
+    const cells = screen.getAllByRole('button', { name: /cell/i });
     cells.forEach(cell => {
-      expect(cell).toHaveTextContent('');
+      expect(cell).toHaveAccessibleName();
+      expect(cell).toHaveStyle('color: #000'); // Example check for color contrast
     });
     
-    // Check if the current player is reset to 'X'
-    const currentPlayer = screen.getByText(/Current Player: X/i);
-    expect(currentPlayer).toBeInTheDocument();
+    const resetButton = screen.getByRole('button', { name: /reset/i });
+    expect(resetButton).toHaveAccessibleName();
+    expect(resetButton).toHaveFocus();
   });
 });

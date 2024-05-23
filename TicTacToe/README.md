@@ -1,59 +1,21 @@
-# TicTacToe Component Documentation
+# TicTacToe Component
 
-## Component Name: TicTacToe
+## Purpose
+The TicTacToe component allows two players to play a game of Tic Tac Toe. It tracks the number of games won by each player until the game is reset.
 
-### Purpose
-The `TicTacToe` component is a simple tic-tac-toe game designed for 2 players. It allows players to take turns marking cells in a 3x3 grid until one player wins or the game ends in a draw.
+## Properties
+This component does not accept any properties.
 
-### Properties
-This component does not accept any props.
+## State Management
+The component uses the `useState` hook to manage the state of the game board, the current player, and the score for each player.
 
-### State Management
-The component uses the `useState` hook to manage the following states:
-- `board`: An array of 9 elements representing the 3x3 grid.
-- `currentPlayer`: Tracks the current player ('X' or 'O').
-- `status`: Displays the current game status (next player or winner).
-
-### Styling
-TailwindCSS is used for styling the game board, buttons, and overall layout.
-
-### Dependencies
-- React
-- TailwindCSS
-
-### Default Content
-- A 3x3 grid representing the game board.
-- A reset button to start a new game.
-- A display for the current player and game status.
-
-### User Interactions
-- Players can click on the cells to make a move.
-- Players can click the reset button to start a new game.
-
-## Explanation
-
-### State Management
-1. **`board`**: An array of 9 elements representing the 3x3 grid.
-2. **`currentPlayer`**: Tracks the current player ('X' or 'O').
-3. **`status`**: Displays the current game status (next player or winner).
-
-### Functions
-1. **`handleClick(index)`**: Handles cell clicks, updates the board, and checks for a winner.
-2. **`handleReset()`**: Resets the game to its initial state.
-3. **`renderCell(index)`**: Renders a single cell in the grid.
-
-### Winner Calculation
-**`calculateWinner(squares)`**: Determines if there's a winner based on the current board state.
-
-### Styling
-TailwindCSS classes are used for styling the grid, buttons, and overall layout.
+## Styling
+The component uses TailwindCSS for styling. It features a dark gray background and orange text to ensure high contrast and accessibility.
 
 ## Usage
-Import and use the `TicTacToe` component in your main application file (e.g., `App.js`) to render it.
+To use the TicTacToe component, simply import it and include it in your JSX.
 
-### Example
 ```jsx
-import React from 'react';
 import TicTacToe from './TicTacToe';
 
 function App() {
@@ -67,50 +29,37 @@ function App() {
 export default App;
 ```
 
-## Component Code
-Here is the complete code for the `TicTacToe` component:
+## Accessibility
+The component is designed with accessibility in mind, featuring high contrast colors and clear visual indicators.
+
+## Example Implementation
+
+Here is an example implementation of the TicTacToe component:
 
 ```jsx
 import React, { useState } from 'react';
-import './tailwind.css'; // Ensure TailwindCSS is properly imported
+import './TicTacToe.css'; // Assuming you have a CSS file for additional styles
 
 const TicTacToe = () => {
   const [board, setBoard] = useState(Array(9).fill(null));
-  const [currentPlayer, setCurrentPlayer] = useState('X');
-  const [status, setStatus] = useState('Next player: X');
+  const [isXNext, setIsXNext] = useState(true);
+  const [score, setScore] = useState({ X: 0, O: 0 });
 
   const handleClick = (index) => {
+    if (board[index] || calculateWinner(board)) return;
+
     const newBoard = board.slice();
-    if (calculateWinner(board) || newBoard[index]) {
-      return;
-    }
-    newBoard[index] = currentPlayer;
+    newBoard[index] = isXNext ? 'X' : 'O';
     setBoard(newBoard);
+    setIsXNext(!isXNext);
+
     const winner = calculateWinner(newBoard);
     if (winner) {
-      setStatus(`Winner: ${winner}`);
-    } else {
-      const nextPlayer = currentPlayer === 'X' ? 'O' : 'X';
-      setCurrentPlayer(nextPlayer);
-      setStatus(`Next player: ${nextPlayer}`);
+      setScore((prevScore) => ({
+        ...prevScore,
+        [winner]: prevScore[winner] + 1,
+      }));
     }
-  };
-
-  const handleReset = () => {
-    setBoard(Array(9).fill(null));
-    setCurrentPlayer('X');
-    setStatus('Next player: X');
-  };
-
-  const renderCell = (index) => {
-    return (
-      <button
-        className="w-16 h-16 border border-gray-400 text-2xl"
-        onClick={() => handleClick(index)}
-      >
-        {board[index]}
-      </button>
-    );
   };
 
   const calculateWinner = (squares) => {
@@ -133,17 +82,62 @@ const TicTacToe = () => {
     return null;
   };
 
-  return (
-    <div className="flex flex-col items-center">
-      <div className="text-xl mb-4">{status}</div>
-      <div className="grid grid-cols-3 gap-1">
-        {Array.from({ length: 9 }).map((_, index) => renderCell(index))}
-      </div>
+  const resetGame = () => {
+    setBoard(Array(9).fill(null));
+    setIsXNext(true);
+  };
+
+  const resetScore = () => {
+    setScore({ X: 0, O: 0 });
+    resetGame();
+  };
+
+  const renderSquare = (index) => {
+    return (
       <button
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
-        onClick={handleReset}
+        className="square bg-gray-800 text-orange-500"
+        onClick={() => handleClick(index)}
       >
-        Reset
+        {board[index]}
+      </button>
+    );
+  };
+
+  const winner = calculateWinner(board);
+  const status = winner
+    ? `Winner: ${winner}`
+    : `Next player: ${isXNext ? 'X' : 'O'}`;
+
+  return (
+    <div className="tic-tac-toe">
+      <div className="status text-orange-500">{status}</div>
+      <div className="board">
+        <div className="board-row">
+          {renderSquare(0)}
+          {renderSquare(1)}
+          {renderSquare(2)}
+        </div>
+        <div className="board-row">
+          {renderSquare(3)}
+          {renderSquare(4)}
+          {renderSquare(5)}
+        </div>
+        <div className="board-row">
+          {renderSquare(6)}
+          {renderSquare(7)}
+          {renderSquare(8)}
+        </div>
+      </div>
+      <div className="score text-orange-500">
+        <p>Score</p>
+        <p>X: {score.X}</p>
+        <p>O: {score.O}</p>
+      </div>
+      <button className="reset-button bg-gray-800 text-orange-500" onClick={resetGame}>
+        Reset Game
+      </button>
+      <button className="reset-button bg-gray-800 text-orange-500" onClick={resetScore}>
+        Reset Score
       </button>
     </div>
   );
@@ -152,8 +146,7 @@ const TicTacToe = () => {
 export default TicTacToe;
 ```
 
-### Notes
-- Ensure TailwindCSS is properly set up in your project.
-- The `tailwind.css` file should be imported in your project to apply the styles.
-
-This documentation provides a comprehensive guide to using and understanding the `TicTacToe` component.
+## Additional Notes
+- Ensure you have TailwindCSS set up in your project to use the provided classes.
+- You can customize the styles further by modifying the TailwindCSS classes or adding additional CSS.
+- The component is designed to be simple and easy to use, making it a great addition to any React application.
